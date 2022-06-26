@@ -1,37 +1,8 @@
-import pandas as pd
-import os
-import sklearn
-import triton_python_backend_utils as pb_utils
-from sklearn.preprocessing import LabelEncoder
-import numpy as np
 import json
-import pickle
-from pathlib import Path
+import triton_python_backend_utils as pb_utils
+import numpy as np
 
-COL_NAMES = ['User',
- 'Card',
- 'Year',
- 'Month',
- 'Day',
- 'Time',
- 'Amount',
- 'Use Chip',
- 'Merchant Name',
- 'Merchant City',
- 'Merchant State',
- 'Zip',
- 'MCC',
- 'Errors?']
-
-CAT_COL_NAMES = ['Zip', 'MCC', 'Merchant Name', 'Use Chip', 'Merchant City', 'Merchant State']
-
-us_states_plus_online = ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
-           'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME',
-           'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM',
-           'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX',
-           'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY', 'ONLINE']
-
-LABEL_ENCODERS_FILE = 'label_encoders.pkl'
+CLASS_LABELS = ['NOT FRAUD', 'FRAUD']
 
 class TritonPythonModel:
     """Your Python model must use the same class name. Every Python model
@@ -57,17 +28,11 @@ class TritonPythonModel:
         
         self.model_config = json.loads(args['model_config'])
         
-        output_config = pb_utils.get_output_config_by_name(self.model_config, "OUTPUT")
-
-
-        # Convert Triton types to numpy types
+        output_config = pb_utils.get_output_config_by_name(self.model_config, "CLASS_LABEL")  
+        
+                # Convert Triton types to numpy types
         self.output_dtype = pb_utils.triton_string_to_numpy(
             output_config['data_type'])
-        
-        cur_folder = Path(__file__).parent
-        with open(str(cur_folder/LABEL_ENCODERS_FILE), 'rb') as f:
-                  self.encoders = pickle.load(f)
-        
         
     def execute(self, requests):
         """`execute` must be implemented in every Python model. `execute`
@@ -95,32 +60,12 @@ class TritonPythonModel:
         # and create a pb_utils.InferenceResponse for each of them.
         
         for request in requests:
-            # Get input tensors 
-            input_data = pb_utils.get_input_tensor_by_name(request, 'INPUT').as_numpy()
+            # Get input tensor
             
-            input_data = input_data.astype(str)
-            data = pd.DataFrame(input_data, columns=COL_NAMES)
-            data.loc[data["Merchant City"]=="ONLINE", "Merchant State"] = "ONLINE" 
-            data.loc[data["Merchant City"]=="ONLINE", "Zip"] = "ONLINE" 
-            data['Errors?'] = (data['Errors?'] != 'nan').astype(int)
-        
-            data.loc[~data["Merchant State"].isin(us_states_plus_online), "Zip"] = "FOREIGN"
-            data['Amount'] = data['Amount'].str.slice(1)
-            data['Hour'] = data['Time'].str.slice(stop=2)
-            data['Minute'] = data['Time'].str.slice(start=3)
-            data.drop(columns=['Time'], inplace=True)
-
-            for col in CAT_COL_NAMES:
-                le = LabelEncoder()
-                le.classes_ = self.encoders[col]
-                data[col] = le.transform(data[col])
-                
-            # Create output tensors. You need pb_utils.Tensor
-            # objects to create pb_utils.InferenceResponse.
+            class_indices = pb_utils.get_input_tensor_by_name(request, 'CLASS_IDX').as_numpy()
+            class_labels = [CLASS_LABEL[int(idx)] for idx in class_indices]
+            class_labels_np = np.array(class_labels).astype(self.output_dtype)
             
-            data_np = data.values.astype(self.output_dtype)
-            data_tensor = pb_utils.Tensor('OUTPUT', data_np)
-           
             # Create InferenceResponse. You can set an error here in case
             # there was a problem with handling this inference request.
             # Below is an example of how you can set errors in inference
@@ -128,7 +73,9 @@ class TritonPythonModel:
             #
             # pb_utils.InferenceResponse(
             #    output_tensors=..., TritonError("An error occured"))
-            inference_response = pb_utils.InferenceResponse(output_tensors=[data_tensor])
+            
+            class_label_tensor = pb_utils.Tensor('CLASS_LABEL', class_labels_np)
+            inference_response = pb_utils.InferenceResponse(output_tensors=[class_label_tensor])
             responses.append(inference_response)
 
         # You should return a list of pb_utils.InferenceResponse. Length
