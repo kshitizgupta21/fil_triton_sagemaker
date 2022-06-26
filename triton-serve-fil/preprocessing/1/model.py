@@ -1,9 +1,37 @@
 import cudf
+import os
 import cuml
 import triton_python_backend_utils as pb_utils
 import numpy as np
 import json
+import pickle
 from cudf.api.types import is_string_dtype 
+
+COL_NAMES = ['User',
+ 'Card',
+ 'Year',
+ 'Month',
+ 'Day',
+ 'Amount',
+ 'Use Chip',
+ 'Merchant Name',
+ 'Merchant City',
+ 'Merchant State',
+ 'Zip',
+ 'MCC',
+ 'Errors?',
+ 'Hour',
+ 'Minute']
+
+CAT_COL_NAMES = ['Zip', 'MCC', 'Merchant Name', 'Use Chip', 'Merchant City', 'Merchant State']
+
+us_states_plus_online = ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
+           'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME',
+           'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM',
+           'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX',
+           'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY', 'ONLINE']
+
+LABEL_ENCODERS_FILE = 'label_encoders.pkl'
 
 class TritonPythonModel:
     """Your Python model must use the same class name. Every Python model
@@ -25,19 +53,22 @@ class TritonPythonModel:
           * model_version: Model version
           * model_name: Model name
         """
-        # Parse model configs
-        self.amount_dtype = 'float32'
+        # Parse model config
+        
         self.model_config = json.loads(args['model_config'])
-        amount_config = pb_utils.get_output_config_by_name(self.model_config, "AMOUNT")
+        
+        output_config = pb_utils.get_output_config_by_name(self.model_config, "OUTPUT")
 
 
         # Convert Triton types to numpy types
-        self.amount_dtype = pb_utils.triton_string_to_numpy(
-            amount_config['data_type'])
+        self.output_dtype = pb_utils.triton_string_to_numpy(
+            output_config['data_type'])
+        
+        cur_folder = Path(__file__).parent
+        with open(str(cur_folder/LABEL_ENCODERS_FILE), 'rb') as f:
+                  self.encoders = pickle.load(f)
         
         
-
-
     def execute(self, requests):
         """`execute` must be implemented in every Python model. `execute`
         function receives a list of pb_utils.InferenceRequest as the only
@@ -65,17 +96,33 @@ class TritonPythonModel:
         
         for request in requests:
             # Get input tensors 
-            data = pb_utils.get_input_tensor_by_name(request, 'AMOUNT').as_numpy()
+            input_data = pb_utils.get_input_tensor_by_name(request, 'INPUT').as_numpy()
             # we get byte representation so we convert it to to string
             if is_string_dtype(data.dtype):
                 data = data.astype("str")
             # in case of string data cudf can only create dataframe from list of data
-            df = cudf.DataFrame(data.tolist(), columns=['Amount'])
+            data = cudf.DataFrame(input_data.tolist(), columns=COLUMN_NAMES)
             
-            df['Amount'] = df['Amount'].str.slice(1)
+            data['Amount'] = data['Amount'].str.slice(1)
+            data.loc[data["Merchant City"]=="ONLINE", "Merchant State"] = "ONLINE" 
+            data.loc[data["Merchant City"]=="ONLINE", "Zip"] = "ONLINE" 
+            data['Errors?'] = data['Errors?'].notna().astype(int)
+        
+            data.loc[~data["Merchant State"].isin(us_states_plus_online), "Zip"] = "FOREIGN"
+            data['Amount'] = data['Amount'].str.slice(1).astype('float32')
+            data['Hour'] = data['Time'].str.slice(stop=2).astype('int64')
+            data['Minute'] = data['Time'].str.slice(start=3).astype('int64')
+            data.drop(columns=['Time'], inplace=True)
+
+            for col in CAT_COL_NAMES:
+                le = self.encoders[col]
+                data[col] = le.transform(data[col])
+                
             # Create output tensors. You need pb_utils.Tensor
             # objects to create pb_utils.InferenceResponse.
-            amount_np = df['Amount'].values_host
+            
+            data = data.astype(self.output_dtype)
+            amount_np = d.values_host
             amount_tensor = pb_utils.Tensor(
                 'AMOUNT',
                 amount_np.astype(self.amount_dtype))
