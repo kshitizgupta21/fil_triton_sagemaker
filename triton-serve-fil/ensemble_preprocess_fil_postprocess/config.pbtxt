@@ -10,7 +10,7 @@ input [
 ]
 output [
   {
-    name: "postprocessed_predictions"
+    name: "processed_predictions"
     data_type: TYPE_STRING
     dims: [ 1 ]
   }
@@ -50,7 +50,7 @@ ensemble_scheduling {
       }
       output_map {
         key: "CLASS_LABEL"
-        value: "postprocessed_predictions"
+        value: "processed_predictions"
       }
     }
   ]
