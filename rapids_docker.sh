@@ -3,4 +3,4 @@ docker run --gpus all --rm -it \
     -p 8887:8887 \
     -v ${PWD}:/workspace \
     -w /workspace \
-    rapidsai/rapidsai-core:22.04-cuda11.4-base-ubuntu20.04-py3.9
+    rapidsai/rapidsai-core:22.06-cuda11.5-base-ubuntu20.04-py3.8

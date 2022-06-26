@@ -1,5 +1,5 @@
-import cudf
-import cuml
+# import cudf
+# import cuml
 import triton_python_backend_utils as pb_utils
 import numpy as np
 import json
@@ -26,16 +26,16 @@ class TritonPythonModel:
         """
         # Parse model configs
         self.amount_dtype = 'float32'
-#         self.model_config = model_config = json.loads(args['model_config'])
-
-#         # Parse model output configs 
-#         amount_config = pb_utils.get_output_config_by_name(
-#             model_config, "AMOUNT")
+        self.model_config = json.loads(args['model_config'])
+        amount_config = pb_utils.get_output_config_by_name(self.model_config, "AMOUNT")
+        print("\namount_config is", amount_config, "\n")
 
 
-#         # Convert Triton types to numpy types
-#         self.amount_dtype = pb_utils.triton_string_to_numpy(
-#             amount_config['data_type'])
+        # Convert Triton types to numpy types
+        self.amount_dtype = pb_utils.triton_string_to_numpy(
+            amount_config['data_type'])
+        
+        print("\namount_dtype is", self.amount_dtype, "\n")
         
 
 
@@ -63,6 +63,7 @@ class TritonPythonModel:
 
         # Every Python backend must iterate over everyone of the requests
         # and create a pb_utils.InferenceResponse for each of them.
+        
         for request in requests:
             # Get input tensors 
             amount = pb_utils.get_input_tensor_by_name(request, 'AMOUNT').as_numpy()

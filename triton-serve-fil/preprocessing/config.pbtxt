@@ -22,7 +22,3 @@ instance_group [
         kind: KIND_GPU
     }
 ]
-parameters: {
-  key: "EXECUTION_ENV_PATH",
-  value: {string_value: "$$TRITON_MODEL_DIRECTORY/rapids22.06_cuda11.5_py3.8.tar.gz"}
-}
