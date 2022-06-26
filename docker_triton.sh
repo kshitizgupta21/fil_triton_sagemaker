@@ -1,6 +1,6 @@
 docker run --gpus all --rm -it \
     --shm-size=1g --ulimit memlock=-1 \
-    -p 8887:8887 \
+    -p 8888:8888 -p 8000:8000 -p 8001:8001 -p 8002:8002 \
     -v ${PWD}:/workspace \
     -w /workspace \
-    rapidsai/rapidsai-core:22.04-cuda11.4-base-ubuntu20.04-py3.9
+    nvcr.io/nvidia/tritonserver:22.05-py3 bash

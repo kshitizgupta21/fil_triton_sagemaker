@@ -1,6 +1,8 @@
 import cudf
 import cuml
 import triton_python_backend_utils as pb_utils
+import numpy as np
+import json
 
 class TritonPythonModel:
     """Your Python model must use the same class name. Every Python model
@@ -23,16 +25,18 @@ class TritonPythonModel:
           * model_name: Model name
         """
         # Parse model configs
-        self.model_config = model_config = json.loads(args['model_config'])
+        self.amount_dtype = 'float32'
+#         self.model_config = model_config = json.loads(args['model_config'])
 
-        # Parse model output configs 
-        amount_config = pb_utils.get_output_config_by_name(
-            model_config, "AMOUNT")
+#         # Parse model output configs 
+#         amount_config = pb_utils.get_output_config_by_name(
+#             model_config, "AMOUNT")
 
 
-        # Convert Triton types to numpy types
-        self.amount_dtype = pb_utils.triton_string_to_numpy(
-            amount_config['data_type'])
+#         # Convert Triton types to numpy types
+#         self.amount_dtype = pb_utils.triton_string_to_numpy(
+#             amount_config['data_type'])
+        
 
 
     def execute(self, requests):
@@ -68,9 +72,10 @@ class TritonPythonModel:
 
             # Create output tensors. You need pb_utils.Tensor
             # objects to create pb_utils.InferenceResponse.
+            amount_np = data['Amount'].values_host
             amount_tensor = pb_utils.Tensor(
                 'AMOUNT',
-                np.array().astype(self.amount_dtype))
+                amount_np.astype(self.amount_dtype))
 
 
             # Create InferenceResponse. You can set an error here in case
@@ -80,10 +85,7 @@ class TritonPythonModel:
             #
             # pb_utils.InferenceResponse(
             #    output_tensors=..., TritonError("An error occured"))
-            inference_response = pb_utils.InferenceResponse(output_tensors=[
-                input_id_tensor,
-                request_input_len_tensor,
-                request_output_len_tensor])
+            inference_response = pb_utils.InferenceResponse(output_tensors=[amount_tensor])
             responses.append(inference_response)
 
         # You should return a list of pb_utils.InferenceResponse. Length
@@ -96,5 +98,5 @@ class TritonPythonModel:
         Implementing `finalize` function is optional. This function allows
         the model to perform any necessary clean ups before exit.
         """
+        cur_folder = Path(__file__).parent
         print('Cleaning up...')
-cur_folder = Path(__file__).parent

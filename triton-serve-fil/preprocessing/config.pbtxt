@@ -5,14 +5,14 @@ input [
     {
         name: "AMOUNT"
         data_type: TYPE_STRING
-        dims: [ -1 ]
+        dims: [ 1 ]
     }
 ]
 output [
     {
         name: "AMOUNT"
         data_type: TYPE_FP32
-        dims: [ -1 ]
+        dims: [ 1 ]
     }
 ]
 
@@ -24,5 +24,5 @@ instance_group [
 ]
 parameters: {
   key: "EXECUTION_ENV_PATH",
-  value: {string_value: "$$TRITON_MODEL_DIRECTORY/python3.6.tar.gz"}
+  value: {string_value: "$$TRITON_MODEL_DIRECTORY/rapids22.06_cuda11.5_py3.8.tar.gz"}
 }

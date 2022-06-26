@@ -1,5 +1,6 @@
 #!/bin/bash
 
+pip install -q jupyterlab
 # Port at which Jupyter should be run inside the container
 PORT=$1
 
