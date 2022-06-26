@@ -1,8 +1,9 @@
-# import cudf
-# import cuml
+import cudf
+import cuml
 import triton_python_backend_utils as pb_utils
 import numpy as np
 import json
+from cudf.api.types import is_string_dtype 
 
 class TritonPythonModel:
     """Your Python model must use the same class name. Every Python model
@@ -28,14 +29,12 @@ class TritonPythonModel:
         self.amount_dtype = 'float32'
         self.model_config = json.loads(args['model_config'])
         amount_config = pb_utils.get_output_config_by_name(self.model_config, "AMOUNT")
-        print("\namount_config is", amount_config, "\n")
 
 
         # Convert Triton types to numpy types
         self.amount_dtype = pb_utils.triton_string_to_numpy(
             amount_config['data_type'])
         
-        print("\namount_dtype is", self.amount_dtype, "\n")
         
 
 
@@ -66,14 +65,17 @@ class TritonPythonModel:
         
         for request in requests:
             # Get input tensors 
-            amount = pb_utils.get_input_tensor_by_name(request, 'AMOUNT').as_numpy()
+            data = pb_utils.get_input_tensor_by_name(request, 'AMOUNT').as_numpy()
+            # we get byte representation so we convert it to to string
+            if is_string_dtype(data.dtype):
+                data = data.astype("str")
+            # in case of string data cudf can only create dataframe from list of data
+            df = cudf.DataFrame(data.tolist(), columns=['Amount'])
             
-            data = cudf.DataFrame({'Amount' : amount})
-            data['Amount'] = data['Amount'].str.slice(1)
-
+            df['Amount'] = df['Amount'].str.slice(1)
             # Create output tensors. You need pb_utils.Tensor
             # objects to create pb_utils.InferenceResponse.
-            amount_np = data['Amount'].values_host
+            amount_np = df['Amount'].values_host
             amount_tensor = pb_utils.Tensor(
                 'AMOUNT',
                 amount_np.astype(self.amount_dtype))
