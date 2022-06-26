@@ -1,17 +1,19 @@
-import cudf
+import pandas as pd
 import os
-import cuml
+import sklearn
 import triton_python_backend_utils as pb_utils
+from sklearn.preprocessing import LabelEncoder
 import numpy as np
 import json
 import pickle
-from cudf.api.types import is_string_dtype 
+from pathlib import Path
 
 COL_NAMES = ['User',
  'Card',
  'Year',
  'Month',
  'Day',
+ 'Time',
  'Amount',
  'Use Chip',
  'Merchant Name',
@@ -19,9 +21,7 @@ COL_NAMES = ['User',
  'Merchant State',
  'Zip',
  'MCC',
- 'Errors?',
- 'Hour',
- 'Minute']
+ 'Errors?']
 
 CAT_COL_NAMES = ['Zip', 'MCC', 'Merchant Name', 'Use Chip', 'Merchant City', 'Merchant State']
 
@@ -97,46 +97,51 @@ class TritonPythonModel:
         for request in requests:
             # Get input tensors 
             input_data = pb_utils.get_input_tensor_by_name(request, 'INPUT').as_numpy()
+            print("input data is", input_data)
+            print("type of input_data is", type(input_data))
+            
             # we get byte representation so we convert it to to string
-            if is_string_dtype(data.dtype):
-                data = data.astype("str")
-            # in case of string data cudf can only create dataframe from list of data
-            data = cudf.DataFrame(input_data.tolist(), columns=COLUMN_NAMES)
+#             if is_string_dtype(data.dtype):
+#                 data = data.astype("str")
+#             # in case of string data cudf can only create dataframe from list of data
+#             data = cudf.DataFrame(input_data.tolist(), columns=COLUMN_NAMES)
             
-            data['Amount'] = data['Amount'].str.slice(1)
-            data.loc[data["Merchant City"]=="ONLINE", "Merchant State"] = "ONLINE" 
-            data.loc[data["Merchant City"]=="ONLINE", "Zip"] = "ONLINE" 
-            data['Errors?'] = data['Errors?'].notna().astype(int)
+#             data['Amount'] = data['Amount'].str.slice(1)
+#             data.loc[data["Merchant City"]=="ONLINE", "Merchant State"] = "ONLINE" 
+#             data.loc[data["Merchant City"]=="ONLINE", "Zip"] = "ONLINE" 
+#             data['Errors?'] = data['Errors?'].notna().astype(int)
         
-            data.loc[~data["Merchant State"].isin(us_states_plus_online), "Zip"] = "FOREIGN"
-            data['Amount'] = data['Amount'].str.slice(1).astype('float32')
-            data['Hour'] = data['Time'].str.slice(stop=2).astype('int64')
-            data['Minute'] = data['Time'].str.slice(start=3).astype('int64')
-            data.drop(columns=['Time'], inplace=True)
+#             data.loc[~data["Merchant State"].isin(us_states_plus_online), "Zip"] = "FOREIGN"
+#             data['Amount'] = data['Amount'].str.slice(1).astype('float32')
+#             data['Hour'] = data['Time'].str.slice(stop=2).astype('int64')
+#             data['Minute'] = data['Time'].str.slice(start=3).astype('int64')
+#             data.drop(columns=['Time'], inplace=True)
 
-            for col in CAT_COL_NAMES:
-                le = self.encoders[col]
-                data[col] = le.transform(data[col])
+#             for col in CAT_COL_NAMES:
+#                 le = LabelEncoder()
+#                 le.classes_ = self.encoders[col]
+#                 data[col] = le.transform(data[col])
                 
-            # Create output tensors. You need pb_utils.Tensor
-            # objects to create pb_utils.InferenceResponse.
+#             # Create output tensors. You need pb_utils.Tensor
+#             # objects to create pb_utils.InferenceResponse.
             
-            data = data.astype(self.output_dtype)
-            amount_np = d.values_host
-            amount_tensor = pb_utils.Tensor(
-                'AMOUNT',
-                amount_np.astype(self.amount_dtype))
+#             data = data.astype(self.output_dtype)
+#             data_np = data.values_host
+            
+#             data_tensor = pb_utils.Tensor(
+#                 'OUTPUT',
+#                 data_np.astype(self.output_dtype))
 
 
-            # Create InferenceResponse. You can set an error here in case
-            # there was a problem with handling this inference request.
-            # Below is an example of how you can set errors in inference
-            # response:
-            #
-            # pb_utils.InferenceResponse(
-            #    output_tensors=..., TritonError("An error occured"))
-            inference_response = pb_utils.InferenceResponse(output_tensors=[amount_tensor])
-            responses.append(inference_response)
+#             # Create InferenceResponse. You can set an error here in case
+#             # there was a problem with handling this inference request.
+#             # Below is an example of how you can set errors in inference
+#             # response:
+#             #
+#             # pb_utils.InferenceResponse(
+#             #    output_tensors=..., TritonError("An error occured"))
+#             inference_response = pb_utils.InferenceResponse(output_tensors=[data_tensor])
+#             responses.append(inference_response)
 
         # You should return a list of pb_utils.InferenceResponse. Length
         # of this list must match the length of `requests` list.
@@ -148,5 +153,4 @@ class TritonPythonModel:
         Implementing `finalize` function is optional. This function allows
         the model to perform any necessary clean ups before exit.
         """
-        cur_folder = Path(__file__).parent
         print('Cleaning up...')
