@@ -1,3 +1,5 @@
+
+
 import pandas as pd
 import os
 import sklearn
@@ -99,6 +101,8 @@ class TritonPythonModel:
             input_data = pb_utils.get_input_tensor_by_name(request, 'INPUT').as_numpy()
             
             input_data = input_data.astype(str)
+            #input_data is numpy array
+            # cudf (input_data.tolist())
             data = pd.DataFrame(input_data, columns=COL_NAMES)
             data.loc[data["Merchant City"]=="ONLINE", "Merchant State"] = "ONLINE" 
             data.loc[data["Merchant City"]=="ONLINE", "Zip"] = "ONLINE" 

@@ -63,7 +63,7 @@ class TritonPythonModel:
             # Get input tensor
             
             class_indices = pb_utils.get_input_tensor_by_name(request, 'CLASS_IDX').as_numpy()
-            class_labels = [CLASS_LABEL[int(idx)] for idx in class_indices]
+            class_labels = [CLASS_LABELS[int(idx)] for idx in class_indices]
             class_labels_np = np.array(class_labels).astype(self.output_dtype)
             
             # Create InferenceResponse. You can set an error here in case
