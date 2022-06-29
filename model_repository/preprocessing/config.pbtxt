@@ -1,0 +1,28 @@
+name: "preprocessing"
+backend: "python"
+max_batch_size: 882352
+input [
+    {
+        name: "INPUT"
+        data_type: TYPE_STRING
+        dims: [ 14 ]
+    }
+]
+output [
+    {
+        name: "OUTPUT"
+        data_type: TYPE_FP32
+        dims: [ 15 ]
+    }
+]
+
+instance_group [
+    {
+        count: 1
+        kind: KIND_CPU
+    }
+]
+parameters: {
+  key: "EXECUTION_ENV_PATH",
+  value: {string_value: "$$TRITON_MODEL_DIRECTORY/rapids22.06_cuda11.5_py3.8.tar.gz"}
+}
