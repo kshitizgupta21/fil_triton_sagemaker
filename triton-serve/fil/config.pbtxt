@@ -22,6 +22,10 @@ parameters [
     value: { string_value: "xgboost_json" }
   },
   {
+    key: "predict_proba"
+    value: { string_value: "false" }
+  },
+  {
     key: "output_class"
     value: { string_value: "true" }
   },
@@ -35,5 +39,4 @@ parameters [
   }
 ]
 
-dynamic_batching {
-}
+dynamic_batching {}
