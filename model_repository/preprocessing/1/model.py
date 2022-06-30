@@ -103,6 +103,7 @@ class TritonPythonModel:
             input_data = input_data.astype(str)
             #input_data is numpy array
             # cudf (input_data.tolist())
+            pd.DataFrame('User': User_data, 'Merchant City': Merchant City)
             data = pd.DataFrame(input_data, columns=COL_NAMES)
             data.loc[data["Merchant City"]=="ONLINE", "Merchant State"] = "ONLINE" 
             data.loc[data["Merchant City"]=="ONLINE", "Zip"] = "ONLINE" 

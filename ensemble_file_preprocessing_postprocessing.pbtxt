@@ -10,8 +10,8 @@ input [
 ]
 output [
   {
-    name: "predictions"
-    data_type: TYPE_FP32
+    name: "processed_predictions"
+    data_type: TYPE_STRING
     dims: [ 1 ]
   }
 ]
@@ -39,6 +39,18 @@ ensemble_scheduling {
       output_map {
         key: "output__0"
         value: "predictions"
+      }
+    },
+    {
+      model_name: "postprocessing"
+      model_version: -1
+      input_map {
+        key: "CLASS_IDX"
+        value: "predictions"
+      }
+      output_map {
+        key: "CLASS_LABEL"
+        value: "processed_predictions"
       }
     }
   ]
