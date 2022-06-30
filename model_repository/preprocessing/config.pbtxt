@@ -3,10 +3,76 @@ backend: "python"
 max_batch_size: 882352
 input [
     {
-        name: "INPUT"
+        name: "User"
+        data_type: TYPE_FP32
+        dims: [ 1 ]
+    },
+    {
+        name: "Card"
+        data_type: TYPE_FP32
+        dims: [ 1 ]
+    },
+    {
+        name: "Year"
+        data_type: TYPE_FP32
+        dims: [ 1 ]
+    },
+    {
+        name: "Month"
+        data_type: TYPE_FP32
+        dims: [ 1 ]
+    },
+    {
+        name: "Day"
+        data_type: TYPE_FP32
+        dims: [ 1 ]
+    },
+    {
+        name: "Time"
         data_type: TYPE_STRING
-        dims: [ 14 ]
+        dims: [ 1 ]
+    },
+    {
+        name: "Amount"
+        data_type: TYPE_STRING
+        dims: [ 1 ]
+    },
+    {
+        name: "Use Chip"
+        data_type: TYPE_STRING
+        dims: [ 1 ]
+    },
+    {
+        name: "Merchant Name"
+        data_type: TYPE_STRING
+        dims: [ 1 ]
+    },
+    {
+        name: "Merchant City"
+        data_type: TYPE_STRING
+        dims: [ 1 ]
+    },
+    {
+        name: "Merchant State"
+        data_type: TYPE_STRING
+        dims: [ 1 ]
+    },
+    {
+        name: "Zip"
+        data_type: TYPE_STRING
+        dims: [ 1 ]
+    },
+    {
+        name: "MCC"
+        data_type: TYPE_STRING
+        dims: [ 1 ]
+    },
+    {
+        name: "Errors?"
+        data_type: TYPE_STRING
+        dims: [ 1 ]
     }
+    
 ]
 output [
     {

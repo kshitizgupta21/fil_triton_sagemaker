@@ -12,7 +12,6 @@ output [
     name: "output__0"
     data_type: TYPE_FP32
     dims: [ 1 ]
-    reshape: { shape: [ 1 ] }
   }
 ]
 instance_group [{ kind: KIND_GPU }]

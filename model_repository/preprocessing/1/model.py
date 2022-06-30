@@ -61,7 +61,6 @@ class TritonPythonModel:
         
         output_config = pb_utils.get_output_config_by_name(self.model_config, "OUTPUT")
 
-
         # Convert Triton types to numpy types
         self.output_dtype = pb_utils.triton_string_to_numpy(
             output_config['data_type'])
@@ -98,16 +97,16 @@ class TritonPythonModel:
         
         for request in requests:
             # Get input tensors 
-            input_data = pb_utils.get_input_tensor_by_name(request, 'INPUT').as_numpy()
-            
-            input_data = input_data.astype(str)
-            #input_data is numpy array
+            data_dict = {}
+            for col in COL_NAMES:
+                data_dict[col] = pb_utils.get_input_tensor_by_name(request, col).as_numpy().squeeze(1)
+                if col in CAT_COL_NAMES:
+                    data_dict[col] = data_dict[col].astype(str)
             # cudf (input_data.tolist())
-            pd.DataFrame('User': User_data, 'Merchant City': Merchant City)
-            data = pd.DataFrame(input_data, columns=COL_NAMES)
+            data = pd.DataFrame(data_dict)
             data.loc[data["Merchant City"]=="ONLINE", "Merchant State"] = "ONLINE" 
             data.loc[data["Merchant City"]=="ONLINE", "Zip"] = "ONLINE" 
-            data['Errors?'] = (data['Errors?'] != 'nan').astype(int)
+            data['Errors?'] = (data['Errors?'] != 'nan').astype(float)
         
             data.loc[~data["Merchant State"].isin(us_states_plus_online), "Zip"] = "FOREIGN"
             data['Amount'] = data['Amount'].str.slice(1)
@@ -123,6 +122,7 @@ class TritonPythonModel:
             # Create output tensors. You need pb_utils.Tensor
             # objects to create pb_utils.InferenceResponse.
             
+            # FIL XGboost expects fp32 input
             data_np = data.values.astype(self.output_dtype)
             data_tensor = pb_utils.Tensor('OUTPUT', data_np)
            
