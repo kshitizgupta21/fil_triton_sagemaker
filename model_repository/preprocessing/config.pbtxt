@@ -90,5 +90,5 @@ instance_group [
 ]
 parameters: {
   key: "EXECUTION_ENV_PATH",
-  value: {string_value: "$$TRITON_MODEL_DIRECTORY/rapids22.06_cuda11.5_py3.8.tar.gz"}
+  value: {string_value: "$$TRITON_MODEL_DIRECTORY/preprocessing_env.tar.gz"}
 }

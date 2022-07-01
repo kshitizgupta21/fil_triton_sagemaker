@@ -1,5 +1,3 @@
-
-
 import pandas as pd
 import os
 import sklearn
@@ -10,7 +8,7 @@ import json
 import pickle
 from pathlib import Path
 
-COL_NAMES = ['User',
+COLUMNS = ['User',
  'Card',
  'Year',
  'Month',
@@ -25,7 +23,17 @@ COL_NAMES = ['User',
  'MCC',
  'Errors?']
 
-CAT_COL_NAMES = ['Zip', 'MCC', 'Merchant Name', 'Use Chip', 'Merchant City', 'Merchant State']
+STR_COLUMNS = ['Time',
+ 'Amount',
+ 'Zip',
+ 'MCC',
+ 'Merchant Name',
+ 'Use Chip',
+ 'Merchant City',
+ 'Merchant State',
+ 'Errors?']
+
+ENCODE_COLUMNS = ['Zip', 'MCC', 'Merchant Name', 'Use Chip', 'Merchant City', 'Merchant State']
 
 us_states_plus_online = ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
            'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME',
@@ -98,15 +106,14 @@ class TritonPythonModel:
         for request in requests:
             # Get input tensors 
             data_dict = {}
-            for col in COL_NAMES:
+            for col in COLUMNS:
                 data_dict[col] = pb_utils.get_input_tensor_by_name(request, col).as_numpy().squeeze(1)
-                if col in CAT_COL_NAMES:
+                if col in STR_COLUMNS:
                     data_dict[col] = data_dict[col].astype(str)
-            # cudf (input_data.tolist())
             data = pd.DataFrame(data_dict)
             data.loc[data["Merchant City"]=="ONLINE", "Merchant State"] = "ONLINE" 
             data.loc[data["Merchant City"]=="ONLINE", "Zip"] = "ONLINE" 
-            data['Errors?'] = (data['Errors?'] != 'nan').astype(float)
+            data['Errors?'] = (data['Errors?'] != 'nan').astype('float32')
         
             data.loc[~data["Merchant State"].isin(us_states_plus_online), "Zip"] = "FOREIGN"
             data['Amount'] = data['Amount'].str.slice(1)
@@ -114,7 +121,7 @@ class TritonPythonModel:
             data['Minute'] = data['Time'].str.slice(start=3)
             data.drop(columns=['Time'], inplace=True)
 
-            for col in CAT_COL_NAMES:
+            for col in ENCODE_COLUMNS:
                 le = LabelEncoder()
                 le.classes_ = self.encoders[col]
                 data[col] = le.transform(data[col])
