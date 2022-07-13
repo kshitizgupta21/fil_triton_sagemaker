@@ -1,0 +1,6 @@
+User,Card,Year,Month,Day,Time,Amount,Use Chip,Merchant Name,Merchant City,Merchant State,Zip,MCC,Errors?
+41,3,2007,12,8,19:19,$2.96,Swipe Transaction,-3853688375077014559,Portland,TX,78374.0,5912,
+973,3,2010,11,17,11:44,$54.13,Online Transaction,-1688244360627004732,ONLINE,,,4784,
+235,1,2013,12,7,16:46,$17.37,Swipe Transaction,-6761066196029841443,Garland,TX,75043.0,5310,
+1359,0,2012,5,24,20:39,$11.01,Online Transaction,-6160036380778658394,ONLINE,,,4121,
+932,3,2013,1,28,13:47,$0.60,Swipe Transaction,97032797689821735,Upper Marlboro,MD,20774.0,5411,
