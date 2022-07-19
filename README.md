@@ -7,4 +7,4 @@ Steps
 
 2. Once JupyterLab is ready, launch the 1_prep_rapids_train_xgb.ipynb notebook with rapids2106 conda kernel. Run through this notebook.
 
-3. Launch the 2_deploy_triton.ipynb notebook using conda_python3 kernel (we don't needs RAPIDS in this notebook) and run through this notebook to deploy the ensemble FIL model on Triton SageMaker endpoint.
+3. Launch the 2_triton_xgb_fil_ensemble.ipynb notebook using conda_python3 kernel (we don't needs RAPIDS in this notebook) and run through this notebook to deploy the ensemble FIL model on Triton SageMaker endpoint.
