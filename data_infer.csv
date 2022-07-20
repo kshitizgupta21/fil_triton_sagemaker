@@ -1,7 +1,0 @@
-User,Card,Year,Month,Day,Time,Amount,Use Chip,Merchant Name,Merchant City,Merchant State,Zip,MCC,Errors?
-864,2,2012,12,29,14:24,$-79.00,Swipe Transaction,1799189980464955940,Rialto,CA,92376.0,5499,
-1144,3,2020,2,14,12:34,$3.53,Swipe Transaction,-7971023300883639138,El Paso,TX,79912.0,5411,
-1412,2,2010,4,20,08:10,$6.77,Swipe Transaction,-85070450838390220,Joplin,MO,64801.0,5541,
-812,1,2014,5,18,12:00,$9.39,Swipe Transaction,7856651342668208192,Saint Johns,MI,48879.0,4900,
-1691,0,2017,9,25,12:32,$43.68,Online Transaction,-2088492411650162548,ONLINE,,,4784,
-987,2,2018,4,9,10:57,$263.06,Swipe Transaction,-8830141029664022553,Rome,Italy,,5211,
