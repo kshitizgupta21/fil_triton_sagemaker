@@ -13,7 +13,7 @@ echo "unzip completed"
 source /home/ec2-user/rapids_kernel/bin/activate
 conda-unpack 
 echo "unpack completed"
-python -m ipykernel install --user --name rapids-2204
+python -m ipykernel install --user --name rapids-2106
 echo "kernel install completed"
 
 EOF
