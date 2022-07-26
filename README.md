@@ -4,9 +4,9 @@ In this example we show an end-to-end GPU-accelerated fraud detection example ma
 
 ## Steps to run the notebooks
 1. Launch SageMaker **notebook instance** with `g4dn.xlarge` instance.
-    - In additional configuration select `Create a new lifecycle configuration`. Specify `rapids-2106` as the name in Configuration Setting specify [on_start.sh](on_start.sh) as the lifecycle configuration start notebook script. This will create the RAPIDS kernel for us to use inside SageMaker notebook. 
-    - **IMPORTANT:** For Volume Size in GB specify at least **100 GB**.
-    - For git repository specify https://github.com/kshitizgupta21/fil_triton_sagemaker
+    - In Additional Configuration select `Create a new lifecycle configuration`. Specify `rapids-2106` as the name in Configuration Setting specify [on_start.sh](on_start.sh) as the lifecycle configuration start notebook script. This will create the RAPIDS kernel for us to use inside SageMaker notebook. 
+    - **IMPORTANT:** In Additional Configuration for **Volume Size in GB** specify at least **100 GB**.
+    - For git repositories select the option `Clone a public git repository to this notebook instance only` and specify the Git repository URL https://github.com/kshitizgupta21/fil_triton_sagemaker
 
 2. Once JupyterLab is ready, launch the [1_prep_rapids_train_xgb.ipynb](1_prep_rapids_train_xgb.ipynb) notebook with `rapids-2106` conda kernel and run through this notebook to do GPU-accelerated data preprocessing and XGBoost training on credit card transactions dataset for fraud detection use-case.
 
