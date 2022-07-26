@@ -4,8 +4,14 @@ In this example we show an end-to-end GPU-accelerated fraud detection example ma
 
 ## Steps to run the notebooks
 1. Launch SageMaker **notebook instance** with `g4dn.xlarge` instance.
-    - In Additional Configuration select `Create a new lifecycle configuration`. Specify `rapids-2106` as the name in Configuration Setting specify [on_start.sh](on_start.sh) as the lifecycle configuration start notebook script. This will create the RAPIDS kernel for us to use inside SageMaker notebook. 
-    - **IMPORTANT:** In Additional Configuration for **Volume Size in GB** specify at least **100 GB**.
+    - In **Additional Configuration** select `Create a new lifecycle configuration`. Specify `rapids-2106` as the name in Configuration Setting and copy paste the [on_start.sh](on_start.sh) script as the lifecycle configuration start notebook script. This will create the RAPIDS kernel for us to use inside SageMaker notebook. 
+        * For those using AWS on Windows machine, because of the incompatibility between Windows and Unix formatted text, especially in end of line characters you will run into this [error](https://stackoverflow.com/questions/63361229/how-do-you-write-lifecycle-configurations-for-sagemaker-on-windows) if you copy paste [on_start.sh](on_start.sh) script. To prevent that use Notepad++ (or other text editor) to change end of line characters (CRLF to LF) in the [on_start.sh](on_start.sh) script.
+            1. Click on Search > Replace (or Ctrl + H)
+            2. Find what: \r\n.
+            3. Replace with: \n.
+            4. Search Mode: select Extended.
+            5. Replace All. And then copy paste this into the AWS Lifecycle Configuration Start Notebook UI
+    - **IMPORTANT:** In Additional Configuration for **Volume Size in GB** specify at least **50 GB**.
     - For git repositories select the option `Clone a public git repository to this notebook instance only` and specify the Git repository URL https://github.com/kshitizgupta21/fil_triton_sagemaker
 
 2. Once JupyterLab is ready, launch the [1_prep_rapids_train_xgb.ipynb](1_prep_rapids_train_xgb.ipynb) notebook with `rapids-2106` conda kernel and run through this notebook to do GPU-accelerated data preprocessing and XGBoost training on credit card transactions dataset for fraud detection use-case.
