@@ -16,4 +16,4 @@ In this example we show an end-to-end GPU-accelerated fraud detection example ma
 
 2. Once JupyterLab is ready, launch the [1_prep_rapids_train_xgb.ipynb](1_prep_rapids_train_xgb.ipynb) notebook with `rapids-2106` conda kernel and run through this notebook to do GPU-accelerated data preprocessing and XGBoost training on credit card transactions dataset for fraud detection use-case.
 
-3. Launch the [2_triton_xgb_fil_ensemble.ipynb](2_triton_xgb_fil_ensemble.ipynb) notebook using `conda_python3` kernel and run through this notebook to deploy the ensemble data preprocessing + XGBoost model inference pipeline using the Triton's Python and FIL Backends on Triton SageMaker `g4dn.xlarge` endpoint.
+3. Launch the [2_triton_xgb_fil_ensemble.ipynb](2_triton_xgb_fil_ensemble.ipynb) notebook using `conda_python3` kernel. **Make sure to use the `conda_python3` kernel for this notebook.**  Run through this notebook to deploy the ensemble data preprocessing + XGBoost model inference pipeline using the Triton's Python and FIL Backends on Triton SageMaker `g4dn.xlarge` endpoint.
